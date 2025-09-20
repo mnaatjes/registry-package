@@ -1,0 +1,36 @@
+{
+    "name": "PHP Registry Dev Container",
+
+    // Point to the root docker-compose.yml file
+    "dockerComposeFile": "../docker-compose.yml",
+
+    // The service from docker-compose.yml to use
+    "service": "app",
+
+    // The folder to open by default in VS Code
+    "workspaceFolder": "/app",
+
+    // Add VS Code customizations
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "bmewburn.vscode-intelephense-client",
+                "xdebug.php-debug",
+                "MehediDracula.php-namespace-resolver",
+                "bierner.markdown-mermaid",
+                "bpruitt-goddard.mermaid-markdown-syntax-highlighting",
+                "fcrespo82.markdown-table-formatter",
+                "Codeium.codeium"
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "[php]": {
+                    "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+                }
+            }
+        }
+    },
+
+    // Run composer install after the container is created
+    "postCreateCommand": "composer install"
+}
