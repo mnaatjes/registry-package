@@ -1,19 +1,16 @@
 <?php
 
-namespace Reg\Components;
+namespace mnaatjes\Registry\Components;
 /**
  * @file src/RegistryMetaData
  *
  */
 class RegistryMetaData
 {
-
-	private ?string $type;
-	private ?string $category;
-
-	public function __construct(string $type, string $category){
-		$this->type 	= $type;
-		$this->category = $category;
+	public function __construct(
+		private readonly ?string $type,
+		private readonly ?string $category
+	){
 	}
 
 	public function getType(){return $this->type;}

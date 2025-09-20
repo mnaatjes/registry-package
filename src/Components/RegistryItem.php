@@ -1,6 +1,7 @@
 <?php
 
-namespace Reg\Components;
+namespace mnaatjes\Registry\Components;
+
 /**
  * @file src/RegistryItem.php
  *
@@ -8,18 +9,14 @@ namespace Reg\Components;
  */
 class RegistryItem {
 
-	private readonly $value;
-	private readonly $metaData;
-
 	/**
 	 * Constructor
 	 */ 
-	public function __construct($value, RegistryMetaData $meta_data){
-		// Assign Value
-		$this->value = $value;
+	public function __construct(
+		private readonly mixed $value,
+		private readonly ?RegistryMetaData $metaData
+	){
 
-		// Assign Meta-data
-		$this->metaData = $meta_data;
 	}
 
 	/**

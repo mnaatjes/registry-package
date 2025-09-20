@@ -1,6 +1,6 @@
 <?php
 
-namespace Reg\Components;
+namespace mnaatjes\Registry\Components;
 /**
  * @file src/Components/RegistryNode.php
  *
@@ -12,12 +12,10 @@ class RegistryNode {
 		$this->children[$key] = $child;	
 	}
 
-	public function getChild(string $key): RegistryNode|RegistryItem|NULL{
-		return $this->children[$key];	
-	}
+	public function getChild(string $key): RegistryNode|RegistryItem|NULL{return $this->children[$key];}
 
-	public function hasChild(string $key): bool{}
+	public function hasChild(string $key): bool{return isset($this->children[$key]);}
 
-	public function getChildren(){}
+	public function getChildren():array {return $this->children;}
 }
 ?>
