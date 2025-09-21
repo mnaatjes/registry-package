@@ -75,8 +75,8 @@
                 $meta_data["category"] ?? NULL
             );
 
-            var_dump($currentNode->getKeys());
-            var_dump($meta_data);
+            //var_dump($currentNode->getKeys());
+            //var_dump($meta_data);
 
         }
     }
