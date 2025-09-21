@@ -43,5 +43,41 @@
             // Return the instance
             return self::$instance;
         }
+
+        public function register(string $alias, mixed $value, array $meta_data=[]): void{
+            // Explode the alias into parts
+            $alias = explode('.', $alias);
+
+            /**
+             * @var RegistryNode $currentNode
+             */
+            $currentNode = $this->root;
+
+            // Find or make current node
+            // Loop through the parts of the alias
+            foreach ($alias as $key) {
+                // If the current node has a child with the current part
+                if ($currentNode->hasChild($key)) {
+                    // Set the current node to the child
+                    $currentNode = $currentNode->getChild($key);
+                } else {
+                    // Create a new node with the current part
+                    $currentNode->setChild($key, new RegistryNode());
+                    // Set the current node to the new node
+                    $currentNode = $currentNode->getChild($key);
+                }
+            }
+
+            // Node located
+            // Generate meta-data
+            $metaData = new RegistryMetaData(
+                $meta_data["type"] ?? NULL,
+                $meta_data["category"] ?? NULL
+            );
+
+            var_dump($currentNode->getKeys());
+            var_dump($meta_data);
+
+        }
     }
 ?>
