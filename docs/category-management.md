@@ -124,6 +124,79 @@ $dbRegistry->addConnection('mysql_main', 'localhost');
 
 ---
 
+## 4. The "Magic" Manager (Hybrid Approach)
+
+This advanced pattern combines the elegant, static-like syntax of an Enum with the runtime flexibility of the dynamic `CategoryManager`. It uses PHP's `__callStatic()` magic method to intercept calls to undefined static methods, providing a clean API for categories that are defined dynamically.
+
+```php
+<?php
+
+namespace mnaatjes\Registry\Support;
+
+use Exception;
+
+class CategoryManager
+{
+    /**
+     * Holds all registered category names.
+     * @var array<string, string>
+     */
+    private static array $categories = [];
+
+    /**
+     * Registers a new category.
+     */
+    public static function add(string $name, string $description = ''): void
+    {
+        // Store the canonical name, keyed by a case-insensitive, normalized version.
+        $normalizedName = strtolower($name);
+        self::$categories[$normalizedName] = $name;
+    }
+
+    /**
+     * Magic method to handle calls like CategoryManager::Database().
+     * @throws Exception if the category does not exist.
+     */
+    public static function __callStatic(string $name, array $arguments): string
+    {
+        $normalizedName = strtolower($name);
+        if (!isset(self::$categories[$normalizedName])) {
+            throw new Exception("Registry category '{$name}' has not been registered.");
+        }
+
+        return self::$categories[$normalizedName];
+    }
+}
+```
+
+### Usage Example
+
+```php
+<?php
+
+// 1. In your application's bootstrap file, you define the categories:
+CategoryManager::add('Database', 'Settings for database connections.');
+CategoryManager::add('Cache', 'Configuration for caching layers.');
+
+// 2. Anywhere in your code, you can now use the clean, static-like syntax:
+$dbCategory = CategoryManager::Database(); // Returns the string 'Database'
+
+$meta = new RegistryMetaData(
+    'string',
+    CategoryManager::Database() // Easy to read and will be validated at runtime.
+);
+
+// 3. An invalid category will throw an exception, providing enforcement.
+try {
+    $invalid = CategoryManager::Api(); // Throws an Exception
+} catch (Exception $e) {
+    // "Registry category 'Api' has not been registered."
+}
+```
+**Enforcement:** A call to an unregistered category results in a runtime `Exception` from the `__callStatic` method, making it impossible to use an invalid category.
+
+---
+
 ## What are Enums?
 
 An **Enum** (short for "Enumeration") is a special type that allows you to define a variable that can only be one of a small, predefined set of possible values. Think of a traffic light that can only be `RED`, `YELLOW`, or `GREEN`.

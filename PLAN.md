@@ -82,6 +82,14 @@ classDiagram
         +getCategory(): string
     }
 
+    class CategoryManager {
+        <<Magic Methods>>
+        -categories: array
+        +add(name: string, description: string): void
+        +exists(name: string): bool
+        +__callStatic(name: string, arguments: array): string
+    }
+
     ServiceRegistry "1" o-- "1" RegistryNode : has root
     RegistryNode "1" o-- "*" RegistryNode : has children
     RegistryNode "1" o-- "*" RegistryItem : has leaves
