@@ -248,7 +248,7 @@ classDiagram
         +decide(action, actor, subject) bool
     }
 
-    AuthorizationGate o-- PolicyDecisionPoint : <<injects>>
+    AuthorizationGate o-- PolicyDecisionPoint : injects
     PolicyDecisionPoint <|.. BlogPostPolicy
 ```
 
@@ -292,3 +292,140 @@ $controller = new PostController($gate);
 $controller->update($currentUser, $postToEdit, ['title' => 'New Title']);
 // Output: Authorization successful! Updating post...
 ```
+
+## 8. Formal Concepts & Naming
+
+The hub-and-spoke architecture we have discussed is an implementation of several formal industry concepts.
+
+### Attribute-Based Access Control (ABAC)
+
+This is the most accurate, industry-standard name for this authorization *strategy*. In an ABAC system, authorization decisions are made by evaluating **attributes** (properties) against a set of policies. This is more flexible than simple Role-Based Access Control (RBAC).
+
+*   **Attributes** are provided by the **PIPs** (e.g., a user's role, a post's status, the current time).
+*   **Policies** are defined in the **PDP** (e.g., "Allow users with the 'editor' role to 'edit' a post if the post's status is 'draft'.").
+*   The **PEP** gathers the attributes and queries the PDP.
+
+The PDP/PIP/PEP model is the classic architecture for implementing an ABAC system.
+
+### The Mediator Pattern
+
+From a software design pattern perspective, this architecture is a clear example of the **Mediator Pattern**. 
+
+The **PEP** acts as the **Mediator**. It manages and coordinates communication between the other components (the Application Code, the PDP, the PIPs). The application code only talks to the Mediator (the PEP), and is completely decoupled from the complex policy logic in the PDP. This reduces direct dependencies and makes the system easier to manage.
+
+## 9. Creating a Reusable ABAC Library
+
+It is an excellent idea and a standard practice to isolate this core logic into a reusable Composer package. This is a form of **Component-Based Development**.
+
+### Package Structure
+
+A minimal, reusable package would have the following structure:
+
+```
+/php-abac-auth/
+├── composer.json
+└── src/
+    ├── Contracts/
+    │   ├── PolicyDecisionPoint.php
+    │   └── PolicyInformationPoint.php
+    ├── Gate.php
+    └── Exception/
+        └── AuthorizationException.php
+```
+
+### File Contents
+
+**`composer.json`**
+```json
+{
+    "name": "your-vendor/abac-auth",
+    "description": "A simple, reusable library for Attribute-Based Access Control.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "YourVendor\\AbacAuth\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=8.1"
+    }
+}
+```
+
+**`src/Contracts/PolicyInformationPoint.php`**
+```php
+<?php
+namespace YourVendor\AbacAuth\Contracts;
+
+interface PolicyInformationPoint {}
+```
+
+**`src/Contracts/PolicyDecisionPoint.php`**
+```php
+<?php
+namespace YourVendor\AbacAuth\Contracts;
+
+interface PolicyDecisionPoint
+{
+    public function decide(string $action, PolicyInformationPoint $actor, ?PolicyInformationPoint $subject = null): bool;
+}
+```
+
+**`src/Gate.php` (The PEP)**
+```php
+<?php
+namespace YourVendor\AbacAuth;
+
+use YourVendor\AbacAuth\Contracts\PolicyDecisionPoint;
+use YourVendor\AbacAuth\Contracts\PolicyInformationPoint;
+use YourVendor\AbacAuth\Exception\AuthorizationException;
+
+class Gate
+{
+    public function __construct(private PolicyDecisionPoint $pdp) {}
+
+    public function authorize(string $action, PolicyInformationPoint $actor, ?PolicyInformationPoint $subject = null): void
+    {
+        if ($this->pdp->decide($action, $actor, $subject) === false) {
+            throw new AuthorizationException("Action '{$action}' is not allowed.");
+        }
+    }
+    // ... other helper methods like allows() / denies() ...
+}
+```
+
+### Library vs. Application Code
+
+This diagram shows the clear separation between the generic **Library** and the specific **Application Code** that uses it.
+
+```mermaid
+graph TD
+    subgraph "Your Application Code"
+        direction LR
+        AppPDP["AppPolicy (implements PDP)"]
+        AppPIP["User/Post (implements PIP)"]
+        AppCode["Controller / Service"]
+    end
+
+    subgraph "Your Reusable Library"
+        direction LR
+        LibGate["Gate (PEP)"]
+        LibPDP["PolicyDecisionPoint (Interface)"]
+        LibPIP["PolicyInformationPoint (Interface)"]
+    end
+
+    AppCode -- uses --> LibGate
+    LibGate -- injects --> LibPDP
+    AppPDP -- dependency --> LibPDP
+    AppPIP -- dependency --> LibPIP
+```
+
+### How to Use the Package
+
+A developer using your library would:
+
+1.  **Implement your library's interfaces** in their own application-specific classes (`User`, `Post`, `AppPolicy`).
+2.  **Instantiate their custom PDP** (`$myAppPolicy = new AppPolicy();`).
+3.  **Instantiate your library's `Gate` (PEP)**, injecting their custom PDP into it (`$gate = new Gate($myAppPolicy);`).
+4.  **Use the `$gate`** in their application to authorize actions.
