@@ -18,6 +18,22 @@
         public function addChild(string $key, RegistryNode|RegistryItem $child): void{
             $this->children[$key] = $child;
         }
+
+        public function getChild(string $key): RegistryNode|RegistryItem{
+            return $this->children[$key];
+        }
+
+        public function hasChild(string $key):bool{
+            return array_key_exists($key, $this->children);
+        }
+
+        public function removeChild(string $key): void{
+            unset($this->children[$key]);
+        }
+
+        public function getChildren(): array{
+            return $this->children;
+        }
     }
 
 ?>
