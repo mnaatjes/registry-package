@@ -16,7 +16,10 @@
     "autoload": {
         "psr-4": {
             "mnaatjes\\Registry\\": "src/"
-        }
+        },
+        "files": [
+            "src/Helpers/item.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
