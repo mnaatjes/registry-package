@@ -1,5 +1,6 @@
 # Composer Documents
 vendor/
+composer.lock
 
 # Development
 .devcontainer/
@@ -11,5 +12,3 @@ tests/
 # Docker
 Dockerfile
 docker-compose.yml
-
-token.md
