@@ -29,5 +29,8 @@
         "psr-4": {
             "mnaatjes\\Registry\\Tests\\": "tests/"
         }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
     }
 }
