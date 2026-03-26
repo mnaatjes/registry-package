@@ -1,4 +1,15 @@
 # Composer Documents
 vendor/
 
+# Development
+.devcontainer/
+
+# Testing
+tests/
+.phpunit.result.cache
+
+# Docker
+Dockerfile
+docker-compose.yml
+
 token.md
